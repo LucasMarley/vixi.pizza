@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pizzaria Sabor & Massa</title>
+<title> Vixi Pizzaria </title>
 <style>
 body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding-bottom:50px;color:#333}
 header{background:#d32f2f;color:#fff;text-align:center;padding:20px}
@@ -147,6 +147,51 @@ document.getElementById("box-segundo-sabor").style.display=document.querySelecto
 var info=obterResumoAtual();
 document.getElementById("resumo-pedido").innerHTML="<strong>"+info.descricao+"</strong><br><span style='font-size:12px;color:#555'>"+info.detalhe+"</span><br><strong>Total: "+fmt(info.valor)+"</strong>";
 }
-
 function pedir(idx){
 if(massas<=0)return;pizzaSelecionada=idx;
+var sel=document.getElementById("select-segundo-sabor");sel.innerHTML="";
+for(var i=0;i<pizzas.length;i++){if(i!==idx){var opt=document.createElement("option");opt.value=i;opt.textContent=pizzas[i].nome;sel.appendChild(opt)}}
+document.querySelector('input[name="tamanho"][value="M"]').checked=true;
+document.querySelector('input[name="tipo_pizza"][value="inteira"]').checked=true;
+atualizarResumoModal();document.getElementById("tela-pagamento").style.display="flex";
+}
+
+var tams=document.getElementsByName("tamanho");for(var t=0;t<tams.length;t++){tams[t].addEventListener("change",atualizarResumoModal)}
+var tipos=document.getElementsByName("tipo_pizza");for(var tp=0;tp<tipos.length;tp++){tipos[tp].addEventListener("change",atualizarResumoModal)}
+document.getElementById("select-segundo-sabor").addEventListener("change",atualizarResumoModal);
+document.getElementById("btn-voltar-pgto").addEventListener("click",function(){document.getElementById("tela-pagamento").style.display="none";pizzaSelecionada=-1});
+var rads=document.getElementsByName("pgto");for(var r=0;r<rads.length;r++){rads[r].addEventListener("change",function(){document.getElementById("box-troco").style.display=(this.value==="Dinheiro"&&this.checked)?"block":"none"})}
+
+document.getElementById("btn-finalizar-pedido").addEventListener("click"),function(){
+if(pizzaSelecionada<0||massas<=0)return;
+
+var nome=document.getElementById("cliente-nome").value.trim();
+var endereco=document.getElementById("cliente-endereco").value.trim();
+
+if(nome===""){alert("Por favor, digite seu nome.");return}
+if(endereco===""){alert("Por favor, informe o endereço de entrega ou retirada.");return}
+
+var info=obterResumoAtual(),pg="Pix";
+for(var i=0;i<rads.length;i++){if(rads[i].checked){pg=rads[i].value;break}}
+var tr="";if(pg==="Dinheiro"){var vt=document.getElementById("valor-troco").value.trim();if(vt!=="")tr=" ("+vt+")"}
+
+massas--;salvar("pz3_m",massas);document.getElementById("tela-pagamento").style.display="none";desenharTela();
+
+var msg="Olá! Novo pedido pelo cardápio:\n"
+       +"👤 *Cliente:* "+nome+"\n"
+       +"📍 *Endereço:* "+endereco+"\n\n"
+       +"🍕 *Pedido:* "+info.descricao+"\n"
+       +"💰 *Valor:* "+fmt(info.valor)+"\n"
+       +"💳 *Pagamento:* "+pg+tr;}
+
+    window.open("https://whatsapp.com" + WHATSAPP.replace(/\D/g, "") + "&text=" + encodeURIComponent(msg), "_blank");
+
+if(ler("pz3_ok")==="1"){
+document.getElementById("tela-inicial").style.display="none";
+var m=ler("pz3_m");if(m!==null)massas=parseInt(m,10);
+temPromo=(ler("pz3_tp")==="true");tituloPromo=ler("pz3_tit")||"";porcentagem=parseFloat(ler("pz3_p"))||0;
+desenharTela();
+}
+</script>
+</body>
+</html>
