@@ -92,8 +92,8 @@ button:disabled{background:#ccc;cursor:not-allowed}
 <button type="button" id="btn-finalizar-pedido" style="background:#25D366;flex:2">📲 Enviar no WhatsApp</button>
 </div></div></div>
 <script>
-// TROQUE O NÚMERO ABAIXO PELO WHATSAPP DA PIZZARIA (55 + DDD + NÚMERO)
-var TELEFONE_WHATSAPP = "5511981903472";
+// COLOQUE AQUI O SEU NÚMERO REAL (Ex: 55 + 84 + 999999999 - apenas números, sem espaços ou traços)
+var TELEFONE_WHATSAPP = "5584999999999";
 
 var massas = 0, temPromo = false, tituloPromo = "", porcentagem = 0, pizzaSelecionada = -1;
 
@@ -291,8 +291,9 @@ document.getElementById("btn-finalizar-pedido").addEventListener("click", functi
   atualizarTela();
   document.getElementById("tela-pagamento").style.display = "none";
 
-  var url = "https://wa.me" + TELEFONE_WHATSAPP + "?text=" + encodeURIComponent(msg);
-  window.open(url, "_blank");
+  var numeroLimpo = TELEFONE_WHATSAPP.replace(/\D/g, "");
+  var url = "https://whatsapp.com" + numeroLimpo + "&text=" + encodeURIComponent(msg);
+  window.location.href = url;
 });
 </script>
 </body>
