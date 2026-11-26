@@ -255,7 +255,7 @@ document.getElementById("btn-finalizar-pedido").addEventListener("click", functi
   var pgto = document.querySelector('input[name="pgto"]:checked').value;
   var troco = document.getElementById("valor-troco").value.trim();
 
-  var msg = "🍕 *NOVO PEDIDO - VIXI PIZZARIA* 🍕\n\n";
+  var msg = "NOVO PEDIDO - VIXI PIZZARIA\n\n";
   msg += "*Cliente:* " + nome + "\n";
   msg += "*Pedido:* Pizza Tamanho " + dados.tam + "\n";
   msg += "*Sabor:* " + dados.descSabor + "\n";
@@ -274,8 +274,9 @@ document.getElementById("btn-finalizar-pedido").addEventListener("click", functi
   desenharTela();
   document.getElementById("tela-pagamento").style.display = "none";
 
-  var url = "https://whatsapp.com" + WHATSAPP + "&text=" + encodeURIComponent(msg);
-  window.open(url, "_blank");
+  var numeroLimpo = WHATSAPP.replace(/\D/g, "");
+  var url = "https://wa.me" + numeroLimpo + "?text=" + encodeURIComponent(msg);
+  window.top.location.href = url;
 });
 </script>
 </body>
