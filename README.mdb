@@ -20,7 +20,14 @@ body{background:#f5f6f8;color:#222;padding-bottom:60px}
 .busca-box{background:#fff;padding:10px 15px;border-bottom:1px solid #e6e8ec;position:sticky;top:0;z-index:50}
 .busca-input{width:100%;max-width:720px;margin:0 auto;display:block;padding:10px 14px;border-radius:8px;border:1px solid #dcdfe4;background:#f5f6f8;font-size:14px;outline:none}
 .container{max-width:720px;margin:0 auto;padding:14px}
-.cat-titulo{font-size:16px;font-weight:700;color:#333;margin:6px 0 12px;padding-left:8px;border-left:4px solid #d32f2f;text-transform:uppercase}.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid #eceef2;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.cat-titulo{font-size:16px;font-weight:700;color:#333;margin:6px 0 12px;padding-left:8px;border-left:4px solid #d32f2f;text-transform:uppercase}
+Use o código com cuidado.
+
+Pedaço 2 de 4 (CSS - Parte 2)
+
+Cole logo abaixo do Pedaço 1:
+html
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid #eceef2;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
 .card-info{flex:1}
 .card-info h3{font-size:16px;font-weight:700;color:#222;margin-bottom:4px}
 .card-info p{font-size:13px;color:#666;line-height:1.35;margin-bottom:8px}
