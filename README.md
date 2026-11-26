@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> Vixi Pizzaria </title>
+<title>Vixi Pizzaria</title>
 <style>
 body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding-bottom:50px;color:#333}
 header{background:#d32f2f;color:#fff;text-align:center;padding:20px}
@@ -17,7 +17,7 @@ header{background:#d32f2f;color:#fff;text-align:center;padding:20px}
 .preco{font-size:15px;font-weight:bold;color:#2e7d32;margin-bottom:8px;line-height:1.4}
 .preco-velho{text-decoration:line-through;color:#999;font-size:12px;font-weight:normal}
 button{background:#d32f2f;color:#fff;border:none;padding:10px 14px;border-radius:5px;font-weight:bold;cursor:pointer}
-button:disabled{background:#ccc}
+button:disabled{background:#ccc;cursor:not-allowed}
 .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;z-index:999;padding:10px;box-sizing:border-box}
 .caixa{background:#fff;padding:20px;border-radius:10px;width:100%;max-width:400px;box-sizing:border-box;max-height:92vh;overflow-y:auto}
 .caixa h2{margin:0 0 12px 0;color:#d32f2f;font-size:20px}
@@ -27,12 +27,12 @@ button:disabled{background:#ccc}
 .grupo-opcoes{display:flex;gap:8px;margin-bottom:12px}
 .grupo-opcoes label{flex:1;padding:9px;border:1px solid #ddd;border-radius:5px;text-align:center;cursor:pointer;font-size:14px;background:#fafafa}
 .opcao-pgto{display:block;padding:9px;border:1px solid #ddd;border-radius:5px;margin-bottom:6px;cursor:pointer;font-size:14px}
-.resumo{background:#f4f4f4;padding:10px;border-radius:5px;font-size:14px;margin-bottom:12px;border-left:4px solid #2e7d32}
+.resumo{background:#f4f4f4;padding:10px;border-radius:5px;font-size:14px;margin-bottom:12px;border-left:4px solid #2e7d32;line-height:1.5}
 .botoes-pgto{display:flex;gap:10px;margin-top:15px}
 </style>
 </head>
 <body>
-<header><h1>🍕 Pizzaria Sabor & Massa</h1><p>Cardápio Digital</p></header>
+<header><h1>🍕 Vixi Pizzaria</h1><p>Cardápio Digital</p></header>
 <div id="aviso-massas" class="barra-massas">Aguardando configuração...</div>
 <div id="aviso-promo" class="barra-promo"></div>
 <div class="container"><h2>Sabores Disponíveis</h2><div id="cardapio"></div></div>
@@ -85,113 +85,198 @@ button:disabled{background:#ccc}
 <button type="button" id="btn-voltar-pgto" style="background:#757575;flex:1">Voltar</button>
 <button type="button" id="btn-finalizar-pedido" style="background:#2e7d32;flex:2">Enviar no WhatsApp</button>
 </div></div></div>
-
 <script>
-var WHATSAPP="5511981903472",massas=0,temPromo=false,tituloPromo="",porcentagem=0,pizzaSelecionada=-1;
-var pizzas=[
-{nome:"Calabresa",desc:"Mussarela, calabresa fatiada, cebola e orégano.",precoM:35,precoG:45},
-{nome:"Marguerita",desc:"Mussarela, tomate, manjericão e parmesão.",precoM:32,precoG:42},
-{nome:"Frango com Catupiry",desc:"Frango desfiado temperado com Catupiry.",precoM:38,precoG:48},
-{nome:"Portuguesa",desc:"Presunto, mussarela, ovo, cebola, ervilha e azeitona.",precoM:40,precoG:50},
-{nome:"Quatro Queijos",desc:"Mussarela, provolone, parmesão e gorgonzola.",precoM:42,precoG:52}
+var WHATSAPP = "5511981903472";
+var massas = 0, temPromo = false, tituloPromo = "", porcentagem = 0, pizzaSelecionada = -1;
+
+var pizzas = [
+  {nome:"Calabresa", desc:"Mussarela, calabresa fatiada, cebola e orégano.", precoM:35, precoG:45},
+  {nome:"Marguerita", desc:"Mussarela, tomate, manjericão e parmesão.", precoM:32, precoG:42},
+  {nome:"Frango com Catupiry", desc:"Frango desfiado temperado com Catupiry.", precoM:38, precoG:48},
+  {nome:"Portuguesa", desc:"Presunto, mussarela, ovo, cebola, ervilha e azeitona.", precoM:40, precoG:50},
+  {nome:"Quatro Queijos", desc:"Mussarela, provolone, parmesão e gorgonzola.", precoM:42, precoG:52}
 ];
+
 function salvar(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function ler(k){try{return localStorage.getItem(k)}catch(e){return null}}
-function fmt(v){return"R$ "+v.toFixed(2).replace(".",",")}
-function calcPreco(val){return temPromo&&porcentagem>0?val-(val*(porcentagem/100)):val}
+function fmt(v){return "R$ " + v.toFixed(2).replace(".",",")}
+function calcPreco(val){return temPromo && porcentagem > 0 ? val - (val * (porcentagem / 100)) : val}
 
-document.getElementById("ativa-promo").addEventListener("change",function(){document.getElementById("box-promo").style.display=this.checked?"block":"none"});
-document.getElementById("btn-confirmar-config").addEventListener("click",function(){
-var v=parseInt(document.getElementById("qtd-massas").value,10);
-massas=isNaN(v)||v<0?0:v;
-temPromo=document.getElementById("ativa-promo").checked;
-tituloPromo=document.getElementById("nome-promo").value||"Promoção Especial";
-porcentagem=parseFloat(document.getElementById("desc-promo").value)||0;
-salvar("pz3_ok","1");salvar("pz3_m",massas);salvar("pz3_tp",temPromo);salvar("pz3_tit",tituloPromo);salvar("pz3_p",porcentagem);
-document.getElementById("tela-inicial").style.display="none";desenharTela();
+document.getElementById("ativa-promo").addEventListener("change", function(){
+  document.getElementById("box-promo").style.display = this.checked ? "block" : "none";
+});
+
+document.getElementById("btn-confirmar-config").addEventListener("click", function(){
+  var v = parseInt(document.getElementById("qtd-massas").value, 10);
+  massas = isNaN(v) || v < 0 ? 0 : v;
+  temPromo = document.getElementById("ativa-promo").checked;
+  tituloPromo = document.getElementById("nome-promo").value || "Promoção Especial";
+  porcentagem = parseFloat(document.getElementById("desc-promo").value) || 0;
+  salvar("pz3_ok","1"); salvar("pz3_m",massas); salvar("pz3_tp",temPromo); salvar("pz3_tit",tituloPromo); salvar("pz3_p",porcentagem);
+  document.getElementById("tela-inicial").style.display = "none";
+  desenharTela();
 });
 
 function desenharTela(){
-var b=document.getElementById("aviso-massas");
-if(massas>0){b.innerHTML="🔥 Restam "+massas+" massas disponíveis hoje!";b.style.background="#222";b.style.color="#fbc02d"}
-else{b.innerHTML="❌ MASSAS ESGOTADAS!";b.style.background="#b71c1c";b.style.color="#fff"}
-var bp=document.getElementById("aviso-promo");
-if(temPromo&&porcentagem>0){bp.style.display="block";bp.innerHTML="🎉 "+tituloPromo+" ("+porcentagem+"% DE DESCONTO)"}
-else{bp.style.display="none"}
-var c=document.getElementById("cardapio");c.innerHTML="";
-for(var i=0;i<pizzas.length;i++){(function(idx){
-var p=pizzas[idx],pm=calcPreco(p.precoM),pg=calcPreco(p.precoG);
-var txtM=temPromo&&porcentagem>0?"M: <span class='preco-velho'>"+fmt(p.precoM)+"</span> "+fmt(pm):"M: "+fmt(pm);
-var txtG=temPromo&&porcentagem>0?"G: <span class='preco-velho'>"+fmt(p.precoG)+"</span> "+fmt(pg):"G: "+fmt(pg);
-var card=document.createElement("div");card.className="card";
-card.innerHTML="<div><h3>"+p.nome+"</h3><p>"+p.desc+"</p></div>";
-var dir=document.createElement("div");dir.className="direita";dir.innerHTML="<div class='preco'>"+txtM+"<br>"+txtG+"</div>";
-var btn=document.createElement("button");btn.type="button";btn.textContent=massas>0?"Pedir":"Esgotado";btn.disabled=massas<=0;
-btn.addEventListener("click",function(){pedir(idx)});
-dir.appendChild(btn);card.appendChild(dir);c.appendChild(card);
-})(i)}
+  var b = document.getElementById("aviso-massas");
+  if(massas > 0){
+    b.innerHTML = "🔥 Restam " + massas + " massas disponíveis hoje!";
+    b.style.background = "#222";
+    b.style.color = "#fbc02d";
+  } else {
+    b.innerHTML = "❌ MASSAS ESGOTADAS!";
+    b.style.background = "#b71c1c";
+    b.style.color = "#fff";
+  }
+
+  var bp = document.getElementById("aviso-promo");
+  if(temPromo && porcentagem > 0){
+    bp.style.display = "block";
+    bp.innerHTML = "🎉 " + tituloPromo + " (" + porcentagem + "% DE DESCONTO)";
+  } else {
+    bp.style.display = "none";
+  }
+
+  var c = document.getElementById("cardapio");
+  c.innerHTML = "";
+  for(var i = 0; i < pizzas.length; i++){
+    (function(idx){
+      var p = pizzas[idx], pm = calcPreco(p.precoM), pg = calcPreco(p.precoG);
+      var txtM = temPromo && porcentagem > 0 ? "M: <span class='preco-velho'>" + fmt(p.precoM) + "</span> " + fmt(pm) : "M: " + fmt(pm);
+      var txtG = temPromo && porcentagem > 0 ? "G: <span class='preco-velho'>" + fmt(p.precoG) + "</span> " + fmt(pg) : "G: " + fmt(pg);
+
+      var card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = "<div><h3>" + p.nome + "</h3><p>" + p.desc + "</p></div>" +
+        "<div class='direita'><div class='preco'>" + txtM + "<br>" + txtG + "</div>" +
+        "<button type='button' " + (massas <= 0 ? "disabled" : "") + ">Pedir</button></div>";
+
+      card.querySelector("button").addEventListener("click", function(){
+        abrirPedido(idx);
+      });
+      c.appendChild(card);
+    })(i);
+  }
 }
 
-function obterResumoAtual(){
-var p1=pizzas[pizzaSelecionada],tam=document.querySelector('input[name="tamanho"]:checked').value,tipo=document.querySelector('input[name="tipo_pizza"]:checked').value;
-var base1=tam==="M"?calcPreco(p1.precoM):calcPreco(p1.precoG);
-if(tipo==="inteira"){return{descricao:"1x Pizza Inteira de "+p1.nome+" (Tam. "+tam+")",valor:base1,detalhe:"Inteira: "+fmt(base1)}}
-var idx2=parseInt(document.getElementById("select-segundo-sabor").value,10),p2=pizzas[idx2];
-var base2=tam==="M"?calcPreco(p2.precoM):calcPreco(p2.precoG),m1=base1/2,m2=base2/2;
-return{descricao:"1x Pizza Meio a Meio: 1/2 "+p1.nome+" + 1/2 "+p2.nome+" (Tam. "+tam+")",valor:m1+m2,detalhe:"1/2 "+p1.nome+" ("+fmt(m1)+") + 1/2 "+p2.nome+" ("+fmt(m2)+")"};
+function abrirPedido(idx){
+  pizzaSelecionada = idx;
+  document.querySelector('input[name="tamanho"][value="M"]').checked = true;
+  document.querySelector('input[name="tipo_pizza"][value="inteira"]').checked = true;
+  document.getElementById("box-segundo-sabor").style.display = "none";
+
+  var sel = document.getElementById("select-segundo-sabor");
+  sel.innerHTML = "";
+  for(var i = 0; i < pizzas.length; i++){
+    if(i !== idx){
+      var opt = document.createElement("option");
+      opt.value = i;
+      opt.text = pizzas[i].nome;
+      sel.appendChild(opt);
+    }
+  }
+  atualizarResumo();
+  document.getElementById("tela-pagamento").style.display = "flex";
 }
 
-function atualizarResumoModal(){
-if(pizzaSelecionada<0)return;
-document.getElementById("box-segundo-sabor").style.display=document.querySelector('input[name="tipo_pizza"]:checked').value==="meia"?"block":"none";
-var info=obterResumoAtual();
-document.getElementById("resumo-pedido").innerHTML="<strong>"+info.descricao+"</strong><br><span style='font-size:12px;color:#555'>"+info.detalhe+"</span><br><strong>Total: "+fmt(info.valor)+"</strong>";
+function obterDadosPedido(){
+  var p1 = pizzas[pizzaSelecionada];
+  var tam = document.querySelector('input[name="tamanho"]:checked').value;
+  var tipo = document.querySelector('input[name="tipo_pizza"]:checked').value;
+  var precoBase = tam === "M" ? p1.precoM : p1.precoG;
+  var descSabor = p1.nome + " (Inteira)";
+
+  if(tipo === "meia"){
+    var idx2 = parseInt(document.getElementById("select-segundo-sabor").value, 10);
+    var p2 = pizzas[idx2];
+    var precoBase2 = tam === "M" ? p2.precoM : p2.precoG;
+    precoBase = Math.max(precoBase, precoBase2);
+    descSabor = "1/2 " + p1.nome + " + 1/2 " + p2.nome;
+  }
+
+  var valorFinal = calcPreco(precoBase);
+  return {
+    tam: tam,
+    descSabor: descSabor,
+    valorFinal: valorFinal
+  };
 }
-function pedir(idx){
-if(massas<=0)return;pizzaSelecionada=idx;
-var sel=document.getElementById("select-segundo-sabor");sel.innerHTML="";
-for(var i=0;i<pizzas.length;i++){if(i!==idx){var opt=document.createElement("option");opt.value=i;opt.textContent=pizzas[i].nome;sel.appendChild(opt)}}
-document.querySelector('input[name="tamanho"][value="M"]').checked=true;
-document.querySelector('input[name="tipo_pizza"][value="inteira"]').checked=true;
-atualizarResumoModal();document.getElementById("tela-pagamento").style.display="flex";
+
+function atualizarResumo(){
+  var dados = obterDadosPedido();
+  var promoTxt = (temPromo && porcentagem > 0) ? "<br><small style='color:#d32f2f'>Desconto aplicado: " + porcentagem + "% (" + tituloPromo + ")</small>" : "";
+  document.getElementById("resumo-pedido").innerHTML =
+    "<strong>Resumo do Pedido:</strong><br>" +
+    "🍕 Pizza " + dados.tam + " — " + dados.descSabor + "<br>" +
+    "💰 <strong>Total: " + fmt(dados.valorFinal) + "</strong>" + promoTxt;
 }
 
-var tams=document.getElementsByName("tamanho");for(var t=0;t<tams.length;t++){tams[t].addEventListener("change",atualizarResumoModal)}
-var tipos=document.getElementsByName("tipo_pizza");for(var tp=0;tp<tipos.length;tp++){tipos[tp].addEventListener("change",atualizarResumoModal)}
-document.getElementById("select-segundo-sabor").addEventListener("change",atualizarResumoModal);
-document.getElementById("btn-voltar-pgto").addEventListener("click",function(){document.getElementById("tela-pagamento").style.display="none";pizzaSelecionada=-1});
-var rads=document.getElementsByName("pgto");for(var r=0;r<rads.length;r++){rads[r].addEventListener("change",function(){document.getElementById("box-troco").style.display=(this.value==="Dinheiro"&&this.checked)?"block":"none"})}
+document.querySelectorAll('input[name="tamanho"], input[name="tipo_pizza"]').forEach(function(el){
+  el.addEventListener("change", function(){
+    var tipo = document.querySelector('input[name="tipo_pizza"]:checked').value;
+    document.getElementById("box-segundo-sabor").style.display = tipo === "meia" ? "block" : "none";
+    atualizarResumo();
+  });
+});
 
-document.getElementById("btn-finalizar-pedido").addEventListener("click"),function(){
-if(pizzaSelecionada<0||massas<=0)return;
+document.getElementById("select-segundo-sabor").addEventListener("change", atualizarResumo);
 
-var nome=document.getElementById("cliente-nome").value.trim();
-var endereco=document.getElementById("cliente-endereco").value.trim();
+document.querySelectorAll('input[name="pgto"]').forEach(function(el){
+  el.addEventListener("change", function(){
+    document.getElementById("box-troco").style.display = this.value === "Dinheiro" ? "block" : "none";
+  });
+});
 
-if(nome===""){alert("Por favor, digite seu nome.");return}
-if(endereco===""){alert("Por favor, informe o endereço de entrega ou retirada.");return}
+document.getElementById("btn-voltar-pgto").addEventListener("click", function(){
+  document.getElementById("tela-pagamento").style.display = "none";
+});
 
-var info=obterResumoAtual(),pg="Pix";
-for(var i=0;i<rads.length;i++){if(rads[i].checked){pg=rads[i].value;break}}
-var tr="";if(pg==="Dinheiro"){var vt=document.getElementById("valor-troco").value.trim();if(vt!=="")tr=" ("+vt+")"}
+document.getElementById("btn-finalizar-pedido").addEventListener("click", function(){
+  if(massas <= 0){
+    alert("Desculpe, as massas esgotaram!");
+    return;
+  }
 
-massas--;salvar("pz3_m",massas);document.getElementById("tela-pagamento").style.display="none";desenharTela();
+  var nome = document.getElementById("cliente-nome").value.trim();
+  var endereco = document.getElementById("cliente-endereco").value.trim();
 
-var msg="Olá! Novo pedido pelo cardápio:\n"
-       +"👤 *Cliente:* "+nome+"\n"
-       +"📍 *Endereço:* "+endereco+"\n\n"
-       +"🍕 *Pedido:* "+info.descricao+"\n"
-       +"💰 *Valor:* "+fmt(info.valor)+"\n"
-       +"💳 *Pagamento:* "+pg+tr;}
+  if(!nome){
+    alert("Por favor, digite seu nome.");
+    document.getElementById("cliente-nome").focus();
+    return;
+  }
+  if(!endereco){
+    alert("Por favor, informe o endereço de entrega ou digite 'Vou retirar'.");
+    document.getElementById("cliente-endereco").focus();
+    return;
+  }
 
-    window.open("https://whatsapp.com" + WHATSAPP.replace(/\D/g, "") + "&text=" + encodeURIComponent(msg), "_blank");
+  var dados = obterDadosPedido();
+  var pgto = document.querySelector('input[name="pgto"]:checked').value;
+  var troco = document.getElementById("valor-troco").value.trim();
 
-if(ler("pz3_ok")==="1"){
-document.getElementById("tela-inicial").style.display="none";
-var m=ler("pz3_m");if(m!==null)massas=parseInt(m,10);
-temPromo=(ler("pz3_tp")==="true");tituloPromo=ler("pz3_tit")||"";porcentagem=parseFloat(ler("pz3_p"))||0;
-desenharTela();
-}
+  var msg = "🍕 *NOVO PEDIDO - VIXI PIZZARIA* 🍕\n\n";
+  msg += "*Cliente:* " + nome + "\n";
+  msg += "*Pedido:* Pizza Tamanho " + dados.tam + "\n";
+  msg += "*Sabor:* " + dados.descSabor + "\n";
+  if(temPromo && porcentagem > 0){
+    msg += "*Promoção:* " + tituloPromo + " (" + porcentagem + "% OFF)\n";
+  }
+  msg += "*Total a Pagar:* " + fmt(dados.valorFinal) + "\n";
+  msg += "*Pagamento:* " + pgto + "\n";
+  if(pgto === "Dinheiro" && troco){
+    msg += "*Troco:* " + troco + "\n";
+  }
+  msg += "*Entrega:* " + endereco;
+
+  massas--;
+  salvar("pz3_m", massas);
+  desenharTela();
+  document.getElementById("tela-pagamento").style.display = "none";
+
+  var url = "https://whatsapp.com" + WHATSAPP + "&text=" + encodeURIComponent(msg);
+  window.open(url, "_blank");
+});
 </script>
 </body>
 </html>
