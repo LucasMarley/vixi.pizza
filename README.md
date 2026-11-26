@@ -1,4 +1,3 @@
-# vixi.pizza
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -50,6 +49,7 @@ button:disabled{background:#ccc}
 <button type="button" id="btn-confirmar-config" style="width:100%;padding:12px;font-size:16px">Confirmar</button>
 </div>
 </div>
+
 <div id="tela-pagamento" class="modal">
 <div class="caixa">
 <h2>Monte sua Pizza</h2>
@@ -65,7 +65,17 @@ button:disabled{background:#ccc}
 </div></div>
 <div id="box-segundo-sabor" class="campo" style="display:none"><label>Escolha o 2º Sabor (Metade):</label><select id="select-segundo-sabor"></select></div>
 <div id="resumo-pedido" class="resumo"></div>
-<div class="campo" style="margin-bottom:6px"><label>3. Forma de Pagamento:</label></div>
+
+<div class="campo">
+  <label>3. Seu Nome:</label>
+  <input type="text" id="cliente-nome" placeholder="Digite seu nome">
+</div>
+<div class="campo">
+  <label>4. Endereço de Entrega (ou Retirada):</label>
+  <input type="text" id="cliente-endereco" placeholder="Rua, número, bairro ou 'Vou retirar'">
+</div>
+
+<div class="campo" style="margin-bottom:6px"><label>5. Forma de Pagamento:</label></div>
 <label class="opcao-pgto"><input type="radio" name="pgto" value="Pix" checked> 💠 Pix</label>
 <label class="opcao-pgto"><input type="radio" name="pgto" value="Cartão de Débito"> 💳 Cartão de Débito</label>
 <label class="opcao-pgto"><input type="radio" name="pgto" value="Cartão de Crédito"> 💳 Cartão de Crédito</label>
@@ -73,8 +83,9 @@ button:disabled{background:#ccc}
 <div id="box-troco" class="campo" style="display:none;margin-top:8px"><label>Troco para quanto? (Opcional)</label><input type="text" id="valor-troco" placeholder="Ex: Troco para R$ 100"></div>
 <div class="botoes-pgto">
 <button type="button" id="btn-voltar-pgto" style="background:#757575;flex:1">Voltar</button>
-<button type="button" id="btn-finalizar-pedido" style="background:#2e7d32;flex:2">Confirmar Pedido</button>
+<button type="button" id="btn-finalizar-pedido" style="background:#2e7d32;flex:2">Enviar no WhatsApp</button>
 </div></div></div>
+
 <script>
 var WHATSAPP="5511981903472",massas=0,temPromo=false,tituloPromo="",porcentagem=0,pizzaSelecionada=-1;
 var pizzas=[
@@ -139,35 +150,3 @@ document.getElementById("resumo-pedido").innerHTML="<strong>"+info.descricao+"</
 
 function pedir(idx){
 if(massas<=0)return;pizzaSelecionada=idx;
-var sel=document.getElementById("select-segundo-sabor");sel.innerHTML="";
-for(var i=0;i<pizzas.length;i++){if(i!==idx){var opt=document.createElement("option");opt.value=i;opt.textContent=pizzas[i].nome;sel.appendChild(opt)}}
-document.querySelector('input[name="tamanho"][value="M"]').checked=true;
-document.querySelector('input[name="tipo_pizza"][value="inteira"]').checked=true;
-atualizarResumoModal();document.getElementById("tela-pagamento").style.display="flex";
-}
-
-var tams=document.getElementsByName("tamanho");for(var t=0;t<tams.length;t++){tams[t].addEventListener("change",atualizarResumoModal)}
-var tipos=document.getElementsByName("tipo_pizza");for(var tp=0;tp<tipos.length;tp++){tipos[tp].addEventListener("change",atualizarResumoModal)}
-document.getElementById("select-segundo-sabor").addEventListener("change",atualizarResumoModal);
-document.getElementById("btn-voltar-pgto").addEventListener("click",function(){document.getElementById("tela-pagamento").style.display="none";pizzaSelecionada=-1});
-var rads=document.getElementsByName("pgto");for(var r=0;r<rads.length;r++){rads[r].addEventListener("change",function(){document.getElementById("box-troco").style.display=(this.value==="Dinheiro"&&this.checked)?"block":"none"})}
-
-document.getElementById("btn-finalizar-pedido").addEventListener("click",function(){
-if(pizzaSelecionada<0||massas<=0)return;
-var info=obterResumoAtual(),pg="Pix";
-for(var i=0;i<rads.length;i++){if(rads[i].checked){pg=rads[i].value;break}}
-var tr="";if(pg==="Dinheiro"){var vt=document.getElementById("valor-troco").value.trim();if(vt!=="")tr=" ("+vt+")"}
-massas--;salvar("pz3_m",massas);document.getElementById("tela-pagamento").style.display="none";desenharTela();
-var msg="Olá! Quero pedir:\n🍕 "+info.descricao+"\n💰 Valor: "+fmt(info.valor)+"\n💳 Pagamento: "+pg+tr;
-window.location.href="https://wa.me"+WHATSAPP.replace(/\D/g,"")+"?text="+encodeURIComponent(msg);
-});
-
-if(ler("pz3_ok")==="1"){
-document.getElementById("tela-inicial").style.display="none";
-var m=ler("pz3_m");if(m!==null)massas=parseInt(m,10);
-temPromo=(ler("pz3_tp")==="true");tituloPromo=ler("pz3_tit")||"";porcentagem=parseFloat(ler("pz3_p"))||0;
-desenharTela();
-}
-</script>
-</body>
-</html>
