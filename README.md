@@ -29,6 +29,40 @@ button:disabled{background:#ccc;cursor:not-allowed}
 .opcao-pgto{display:block;padding:9px;border:1px solid #ddd;border-radius:5px;margin-bottom:6px;cursor:pointer;font-size:14px}
 .resumo{background:#f4f4f4;padding:10px;border-radius:5px;font-size:14px;margin-bottom:12px;border-left:4px solid #2e7d32;line-height:1.5}
 .botoes-pgto{display:flex;gap:10px;margin-top:15px}
+
+/* ESTILO DO CUPOM PARA MINI IMPRESSORA (58mm / 80mm) */
+#cupom-impressao{display:none}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+  body {
+    background: #fff;
+    margin: 0;
+    padding: 0;
+  }
+  header, .barra-massas, .barra-promo, .container, .modal {
+    display: none !important;
+  }
+  #cupom-impressao {
+    display: block !important;
+    width: 100%;
+    max-width: 72mm; /* Proporcional para bobinas 58mm e 80mm */
+    margin: 0 auto;
+    padding: 4mm 3mm;
+    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    line-height: 1.35;
+    color: #000;
+  }
+  .cupom-centro { text-align: center; }
+  .cupom-titulo { font-size: 17px; font-weight: bold; margin: 0 0 2px 0; }
+  .cupom-linha { border-top: 1px dashed #000; margin: 6px 0; }
+  .cupom-destaque { font-size: 15px; font-weight: bold; }
+  .cupom-bloco { margin-bottom: 5px; word-wrap: break-word; }
+}
 </style>
 </head>
 <body>
@@ -83,11 +117,14 @@ button:disabled{background:#ccc;cursor:not-allowed}
 <div id="box-troco" class="campo" style="display:none;margin-top:8px"><label>Troco para quanto? (Opcional)</label><input type="text" id="valor-troco" placeholder="Ex: Troco para R$ 100"></div>
 <div class="botoes-pgto">
 <button type="button" id="btn-voltar-pgto" style="background:#757575;flex:1">Voltar</button>
-<button type="button" id="btn-finalizar-pedido" style="background:#2e7d32;flex:2">Enviar no WhatsApp</button>
+<button type="button" id="btn-finalizar-pedido" style="background:#2e7d32;flex:2">🖨️ Imprimir Pedido</button>
 </div></div></div>
+
+<div id="cupom-impressao"></div>
+
 <script>
-var WHATSAPP = "5511981903472";
 var massas = 0, temPromo = false, tituloPromo = "", porcentagem = 0, pizzaSelecionada = -1;
+var numeroPedido = 0;
 
 var pizzas = [
   {nome:"Calabresa", desc:"Mussarela, calabresa fatiada, cebola e orégano.", precoM:35, precoG:45},
@@ -255,28 +292,49 @@ document.getElementById("btn-finalizar-pedido").addEventListener("click", functi
   var pgto = document.querySelector('input[name="pgto"]:checked').value;
   var troco = document.getElementById("valor-troco").value.trim();
 
-  var msg = "NOVO PEDIDO - VIXI PIZZARIA\n\n";
-  msg += "*Cliente:* " + nome + "\n";
-  msg += "*Pedido:* Pizza Tamanho " + dados.tam + "\n";
-  msg += "*Sabor:* " + dados.descSabor + "\n";
+  numeroPedido++;
+  var agora = new Date();
+  var dataHora = agora.toLocaleDateString("pt-BR") + " " + agora.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+
+  var htmlCupom = "<div class='cupom-centro'>";
+  htmlCupom += "<div class='cupom-titulo'>VIXI PIZZARIA</div>";
+  htmlCupom += "<div>PEDIDO #" + numeroPedido + "</div>";
+  htmlCupom += "<div>" + dataHora + "</div>";
+  htmlCupom += "</div>";
+  htmlCupom += "<div class='cupom-linha'></div>";
+  htmlCupom += "<div class='cupom-bloco'><strong>CLIENTE:</strong> " + nome.toUpperCase() + "</div>";
+  htmlCupom += "<div class='cupom-bloco'><strong>ENTREGA:</strong> " + endereco.toUpperCase() + "</div>";
+  htmlCupom += "<div class='cupom-linha'></div>";
+  htmlCupom += "<div class='cupom-bloco cupom-destaque'>1x PIZZA TAMANHO " + dados.tam + "</div>";
+  htmlCupom += "<div class='cupom-bloco'>" + dados.descSabor.toUpperCase() + "</div>";
   if(temPromo && porcentagem > 0){
-    msg += "*Promoção:* " + tituloPromo + " (" + porcentagem + "% OFF)\n";
+    htmlCupom += "<div class='cupom-bloco'>PROMO: " + tituloPromo + " (-" + porcentagem + "%)</div>";
   }
-  msg += "*Total a Pagar:* " + fmt(dados.valorFinal) + "\n";
-  msg += "*Pagamento:* " + pgto + "\n";
+  htmlCupom += "<div class='cupom-linha'></div>";
+  htmlCupom += "<div class='cupom-bloco cupom-destaque'>TOTAL: " + fmt(dados.valorFinal) + "</div>";
+  htmlCupom += "<div class='cupom-bloco'><strong>PGTO:</strong> " + pgto.toUpperCase() + "</div>";
   if(pgto === "Dinheiro" && troco){
-    msg += "*Troco:* " + troco + "\n";
+    htmlCupom += "<div class='cupom-bloco'><strong>TROCO:</strong> " + troco.toUpperCase() + "</div>";
   }
-  msg += "*Entrega:* " + endereco;
+  htmlCupom += "<div class='cupom-linha'></div>";
+  htmlCupom += "<div class='cupom-centro'>Obrigado pela preferencia!</div><br><br>";
+
+  document.getElementById("cupom-impressao").innerHTML = htmlCupom;
 
   massas--;
   salvar("pz3_m", massas);
   desenharTela();
   document.getElementById("tela-pagamento").style.display = "none";
 
-  var numeroLimpo = WHATSAPP.replace(/\D/g, "");
-  var url = "https://wa.me" + numeroLimpo + "?text=" + encodeURIComponent(msg);
-  window.top.location.href = url;
+  // Limpa campos para o próximo pedido
+  document.getElementById("cliente-nome").value = "";
+  document.getElementById("cliente-endereco").value = "";
+  document.getElementById("valor-troco").value = "";
+
+  // Dispara a janela de impressão proporcional do PC ou Celular
+  setTimeout(function(){
+    window.print();
+  }, 200);
 });
 </script>
 </body>
